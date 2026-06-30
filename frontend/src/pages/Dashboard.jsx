@@ -43,6 +43,7 @@ export default function Dashboard() {
   const power = status?.power_w ?? 0;
   const present = status?.present ?? false;
   const mode = status?.mode ?? "presence";
+  const deviceName = status?.device_name ?? "Gerät";
   const MODE_LABEL = {
     presence: { icon: "👤", text: "Anwesenheit" },
     vacation: { icon: "🏖️", text: "Ferienmodus" },
@@ -56,6 +57,9 @@ export default function Dashboard() {
           {error}
         </div>
       )}
+
+      {/* Gerätename */}
+      <h2 className="text-center text-2xl font-bold">{deviceName}</h2>
 
       {/* Aktiver Modus */}
       <div className="flex justify-center">

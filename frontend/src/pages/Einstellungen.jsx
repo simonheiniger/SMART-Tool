@@ -25,6 +25,7 @@ export default function Einstellungen() {
       .getSettings()
       .then((s) =>
         setForm({
+          device_name: s.device_name || "Gerät",
           off_delay_s: s.off_delay_s,
           standby_w: s.standby_w,
           price_per_kwh: s.price_per_kwh,
@@ -72,6 +73,7 @@ export default function Einstellungen() {
     setSaving(true);
     try {
       const payload = {
+        device_name: form.device_name.trim() || "Gerät",
         off_delay_s: Number(form.off_delay_s),
         standby_w: Number(form.standby_w),
         price_per_kwh: Number(form.price_per_kwh),
@@ -105,6 +107,23 @@ export default function Einstellungen() {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
+      {/* Gerät */}
+      <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        <Field
+          label="Gerätename"
+          hint="Name des angeschlossenen Geräts (z.B. Kaffeemaschine). Wird im Dashboard angezeigt."
+        >
+          <input
+            type="text"
+            maxLength={40}
+            value={form.device_name}
+            onChange={(e) => update("device_name", e.target.value)}
+            className="input"
+            placeholder="z.B. Kaffeemaschine"
+          />
+        </Field>
+      </section>
+
       {/* Betriebsmodus */}
       <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
         <h2 className="text-lg font-semibold">Betriebsmodus</h2>

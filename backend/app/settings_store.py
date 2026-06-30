@@ -19,6 +19,7 @@ import json
 from . import config, db
 
 current: dict = {
+    "device_name": config.DEFAULT_DEVICE_NAME,
     "off_delay_s": config.DEFAULT_OFF_DELAY_S,
     "standby_w": config.DEFAULT_STANDBY_W,
     "price_per_kwh": config.DEFAULT_PRICE_PER_KWH,
@@ -40,6 +41,8 @@ def _parse_override(raw: str) -> bool | None:
 def load() -> None:
     """Gespeicherte Werte aus der DB in `current` laden (ueber den Defaults)."""
     stored = db.load_settings()
+    if stored.get("device_name"):
+        current["device_name"] = stored["device_name"]
     if "off_delay_s" in stored:
         current["off_delay_s"] = int(float(stored["off_delay_s"]))
     if "standby_w" in stored:
@@ -62,6 +65,7 @@ def load() -> None:
 
 
 def update(
+    device_name: str,
     off_delay_s: int,
     standby_w: float,
     price_per_kwh: float,
@@ -71,6 +75,7 @@ def update(
     schedule: list,
 ) -> dict:
     """Aktualisiert `current` und speichert in die DB."""
+    current["device_name"] = device_name
     current["off_delay_s"] = off_delay_s
     current["standby_w"] = standby_w
     current["price_per_kwh"] = price_per_kwh
@@ -80,6 +85,7 @@ def update(
     current["schedule"] = schedule
     db.save_settings(
         {
+            "device_name": device_name,
             "off_delay_s": str(off_delay_s),
             "standby_w": str(standby_w),
             "price_per_kwh": str(price_per_kwh),
