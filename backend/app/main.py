@@ -69,6 +69,7 @@ async def get_status() -> Status:
         present=poller.latest["present"],
         last_update=poller.latest["last_update"],
         mode=poller.latest["mode"],
+        device_name=settings_store.current["device_name"],
     )
 
 
@@ -94,6 +95,7 @@ async def toggle(req: ToggleRequest) -> Status:
         present=poller.latest["present"],
         last_update=poller.latest["last_update"],
         mode=poller.latest["mode"],
+        device_name=settings_store.current["device_name"],
     )
 
 
@@ -140,6 +142,7 @@ async def get_settings() -> Settings:
 @app.put("/api/settings", response_model=Settings)
 async def put_settings(new: Settings) -> Settings:
     updated = settings_store.update(
+        device_name=new.device_name,
         off_delay_s=new.off_delay_s,
         standby_w=new.standby_w,
         price_per_kwh=new.price_per_kwh,

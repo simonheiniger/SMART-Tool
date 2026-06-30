@@ -49,3 +49,4 @@ PRESENCE_TARGET: str = _env("PRESENCE_TARGET", "")
 DEFAULT_OFF_DELAY_S: int = _env_int("OFF_DELAY_S", 180)       # Abschaltverzoegerung
 DEFAULT_STANDBY_W: float = _env_float("STANDBY_W", 5.0)       # angenommener Standby-Verbrauch
 DEFAULT_PRICE_PER_KWH: float = _env_float("PRICE_PER_KWH", 0.30)  # CHF/kWh
+DEFAULT_DEVICE_NAME: str = _env("DEVICE_NAME", "Gerät")      # Anzeigename des Endgeraets

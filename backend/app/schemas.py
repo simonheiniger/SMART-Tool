@@ -17,6 +17,7 @@ class Status(BaseModel):
     present: bool
     last_update: float | None = None  # Unix-Zeitstempel der letzten Messung
     mode: Mode = "presence"
+    device_name: str = "Gerät"
 
 
 class ToggleRequest(BaseModel):
@@ -49,6 +50,7 @@ class ScheduleWindow(BaseModel):
 
 
 class Settings(BaseModel):
+    device_name: str = Field(default="Gerät", min_length=1, max_length=40, description="Anzeigename des Geraets")
     off_delay_s: int = Field(ge=0, description="Abschaltverzoegerung in Sekunden")
     standby_w: float = Field(ge=0, description="Angenommener Standby-Verbrauch in Watt")
     price_per_kwh: float = Field(ge=0, description="Strompreis in CHF/kWh")
