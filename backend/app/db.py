@@ -12,6 +12,9 @@ from typing import Iterator
 
 from . import config
 
+RETENTION_S = 30 * 24 * 3600  # 30 Tage
+_last_cleanup: float = 0.0
+
 
 @contextmanager
 def _connect() -> Iterator[sqlite3.Connection]:
@@ -65,11 +68,17 @@ def save_settings(values: dict[str, str]) -> None:
 
 def insert_measurement(power_w: float, on: bool, present: bool, ts: float | None = None) -> None:
     """Speichert eine einzelne Messung."""
+    global _last_cleanup
+    ts = ts if ts is not None else time.time()
     with _connect() as conn:
         conn.execute(
             "INSERT INTO measurements (ts, power_w, on_state, present) VALUES (?, ?, ?, ?)",
-            (ts if ts is not None else time.time(), power_w, int(on), int(present)),
+            (ts, power_w, int(on), int(present)),
         )
+        # Nur einmal pro Stunde aufraeumen, nicht bei jedem Insert.
+        if ts - _last_cleanup > 3600:
+            conn.execute("DELETE FROM measurements WHERE ts < ?", (ts - RETENTION_S,))
+            _last_cleanup = ts
 
 
 def get_history(since_ts: float) -> list[dict]:

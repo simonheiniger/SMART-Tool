@@ -18,6 +18,23 @@ class ShellyError(RuntimeError):
     """Shelly nicht erreichbar oder lieferte einen Fehler."""
 
 
+_client: httpx.AsyncClient | None = None
+
+
+def _get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None:
+        _client = httpx.AsyncClient(timeout=5.0, auth=_auth())
+    return _client
+
+
+async def aclose() -> None:
+    global _client
+    if _client is not None:
+        await _client.aclose()
+        _client = None
+
+
 def _auth() -> httpx.DigestAuth | None:
     if config.SHELLY_USERNAME and config.SHELLY_PASSWORD:
         return httpx.DigestAuth(config.SHELLY_USERNAME, config.SHELLY_PASSWORD)
@@ -27,10 +44,9 @@ def _auth() -> httpx.DigestAuth | None:
 async def _get(path: str, params: dict | None = None) -> dict:
     url = f"{config.SHELLY_BASE_URL}{path}"
     try:
-        async with httpx.AsyncClient(timeout=5.0, auth=_auth()) as client:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            return resp.json()
+        resp = await _get_client().get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
     except (httpx.HTTPError, ValueError) as exc:
         raise ShellyError(f"Shelly-Aufruf fehlgeschlagen ({url}): {exc}") from exc
 
