@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# SQLite-Datenbank (Messwerte, lokal)
+*.db
+*.sqlite
+*.sqlite3
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Editor / OS
+.~lock.*#
+*.kate-swp
+.DS_Store
+.idea/
+.vscode/
+
+# Lokale Konfiguration / Secrets
+.env
+backend/app/local_config.py
