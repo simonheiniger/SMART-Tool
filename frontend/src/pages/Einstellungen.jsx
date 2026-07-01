@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import { UserIcon, UmbrellaIcon, ClockIcon } from "../icons.jsx";
 
 const PRESENCE_OPTIONS = [
   { value: "null", label: "Automatisch (real erkennen)" },
@@ -8,9 +9,9 @@ const PRESENCE_OPTIONS = [
 ];
 
 const MODES = [
-  { id: "presence", label: "Anwesenheit", icon: "👤", hint: "Schaltet automatisch ab, wenn niemand da ist." },
-  { id: "vacation", label: "Ferien", icon: "🏖️", hint: "Gerät bleibt aus bis zum Rückkehr-Datum." },
-  { id: "schedule", label: "Zeitplan", icon: "🕒", hint: "Gerät an/aus nach festen Uhrzeiten." },
+  { id: "presence", label: "Anwesenheit", Icon: UserIcon, hint: "Schaltet automatisch ab, wenn niemand da ist." },
+  { id: "vacation", label: "Ferien", Icon: UmbrellaIcon, hint: "Gerät bleibt aus bis zum Rückkehr-Datum." },
+  { id: "schedule", label: "Zeitplan", Icon: ClockIcon, hint: "Gerät an/aus nach festen Uhrzeiten." },
 ];
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]; // Index = 0..6 (Mo..So)
@@ -138,8 +139,8 @@ export default function Einstellungen() {
                   : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-700/50"
               }`}
             >
-              <div className="text-2xl">{m.icon}</div>
-              <div className="mt-1 text-sm font-medium">{m.label}</div>
+              <m.Icon className="mx-auto h-7 w-7" />
+              <div className="mt-1.5 text-sm font-medium">{m.label}</div>
             </button>
           ))}
         </div>

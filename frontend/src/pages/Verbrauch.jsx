@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -16,9 +16,18 @@ const RANGES = [
   { id: "week", label: "Woche" },
 ];
 
+// Start des lokalen Tages (00:00) fuer einen Zeitstempel in ms.
+function dayStart(ts) {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
 export default function Verbrauch() {
   const { dark } = useTheme();
   const [range, setRange] = useState("day");
+  // Nur im Wochen-Modus: ein angewaehlter Tag (ms, Tagesbeginn) oder null = ganze Woche.
+  const [selectedDay, setSelectedDay] = useState(null);
   const [data, setData] = useState([]);
   const [savings, setSavings] = useState(null);
   const [error, setError] = useState(null);
@@ -48,18 +57,41 @@ export default function Verbrauch() {
     return () => clearInterval(id);
   }, [load]);
 
+  // Beim Wechsel der Zeitspanne die Tages-Auswahl zuruecksetzen.
+  const changeRange = (id) => {
+    setRange(id);
+    setSelectedDay(null);
+  };
+
+  // Im Wochen-Modus die einzelnen Tage aus den Daten ableiten (fuer die Auswahl unten).
+  const weekDays = useMemo(() => {
+    if (range !== "week") return [];
+    const set = new Map();
+    for (const p of data) set.set(dayStart(p.ts), true);
+    return [...set.keys()].sort((a, b) => a - b);
+  }, [range, data]);
+
+  // Ist ein Einzeltag angewaehlt? -> Daten auf diesen Tag filtern.
+  const drillDay = range === "week" && selectedDay != null;
+  const chartData = useMemo(() => {
+    if (!drillDay) return data;
+    const end = selectedDay + 24 * 3600 * 1000;
+    return data.filter((p) => p.ts >= selectedDay && p.ts < end);
+  }, [drillDay, selectedDay, data]);
+
+  // X-Achse: Einzeltag/Tag -> Uhrzeit, ganze Woche -> Datum.
   const fmtAxis = (ts) => {
     const d = new Date(ts);
-    if (range === "week") {
+    if (range === "week" && !drillDay) {
       return d.toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit" });
     }
     return d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" });
   };
 
   const span =
-    data.length > 0
-      ? `${new Date(data[0].ts).toLocaleString("de-CH")} – ${new Date(
-          data[data.length - 1].ts
+    chartData.length > 0
+      ? `${new Date(chartData[0].ts).toLocaleString("de-CH")} – ${new Date(
+          chartData[chartData.length - 1].ts
         ).toLocaleString("de-CH")}`
       : null;
 
@@ -71,7 +103,7 @@ export default function Verbrauch() {
           {RANGES.map((r) => (
             <button
               key={r.id}
-              onClick={() => setRange(r.id)}
+              onClick={() => changeRange(r.id)}
               className={`px-3 py-1 rounded-md text-sm font-medium transition ${
                 range === r.id
                   ? "bg-white text-brand shadow-sm dark:bg-slate-700"
@@ -92,18 +124,20 @@ export default function Verbrauch() {
 
       {span && (
         <div className="text-xs text-slate-400 dark:text-slate-500">
-          {data.length} Messpunkte · {span}
+          {chartData.length} Messpunkte · {span}
         </div>
       )}
 
       <div className="card p-4">
-        {data.length === 0 ? (
+        {chartData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-slate-400 text-sm">
-            Noch keine Messdaten — Backend ein paar Minuten laufen lassen.
+            {drillDay
+              ? "Keine Messdaten für diesen Tag."
+              : "Noch keine Messdaten — Backend ein paar Minuten laufen lassen."}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="watt" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#16a34a" stopOpacity={0.35} />
@@ -147,6 +181,34 @@ export default function Verbrauch() {
         )}
       </div>
 
+      {/* Im Wochen-Modus: Tag anwaehlen, um ihn genauer zu sehen. */}
+      {range === "week" && weekDays.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-xs text-slate-400 dark:text-slate-500">
+            Tag auswählen für Detailansicht:
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <DayChip
+              active={selectedDay == null}
+              onClick={() => setSelectedDay(null)}
+              label="Ganze Woche"
+            />
+            {weekDays.map((d) => (
+              <DayChip
+                key={d}
+                active={selectedDay === d}
+                onClick={() => setSelectedDay(d)}
+                label={new Date(d).toLocaleDateString("de-CH", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "2-digit",
+                })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
           label="Gespart"
@@ -170,10 +232,28 @@ export default function Verbrauch() {
         />
       </div>
       <p className="text-xs text-slate-400 dark:text-slate-500">
+        {range === "week"
+          ? "Kennzahlen gelten für die ganze Woche. "
+          : ""}
         Ersparnis = angenommener Standby-Verbrauch × Zeit, in der das Tool das Gerät
         komplett ausgeschaltet hat. Standby-Watt und Strompreis unter „Einstellungen".
       </p>
     </div>
+  );
+}
+
+function DayChip({ active, onClick, label }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${
+        active
+          ? "bg-brand text-white shadow-sm"
+          : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 

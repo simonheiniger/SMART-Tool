@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../api.js";
+import { UserIcon, UmbrellaIcon, ClockIcon, PowerIcon } from "../icons.jsx";
 
 const REFRESH_MS = 3000;
 
 const MODE_LABEL = {
-  presence: { icon: "👤", text: "Anwesenheit" },
-  vacation: { icon: "🏖️", text: "Ferienmodus" },
-  schedule: { icon: "🕒", text: "Zeitplan" },
+  presence: { Icon: UserIcon, text: "Anwesenheit" },
+  vacation: { Icon: UmbrellaIcon, text: "Ferienmodus" },
+  schedule: { Icon: ClockIcon, text: "Zeitplan" },
 };
 
 export default function Dashboard() {
@@ -64,7 +65,7 @@ export default function Dashboard() {
         <div className="text-center">
           <h2 className="text-2xl font-bold tracking-tight">{deviceName}</h2>
           <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-            <span>{modeInfo.icon}</span>
+            <modeInfo.Icon className="h-3.5 w-3.5" />
             {modeInfo.text}
           </span>
         </div>
@@ -78,7 +79,7 @@ export default function Dashboard() {
               : "bg-slate-100 text-slate-500 hover:bg-slate-200 ring-1 ring-inset ring-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600 dark:ring-slate-600"
           }`}
         >
-          <span className="block text-4xl mb-1">⏻</span>
+          <PowerIcon className="mx-auto mb-1 h-9 w-9" />
           {on ? "EIN" : "AUS"}
         </button>
         <p className="text-sm text-slate-400 dark:text-slate-500">
