@@ -69,13 +69,16 @@ def _schedule_desired(now_dt: datetime) -> bool:
     return False
 
 
-async def _set(on: bool, fallback: bool) -> bool:
-    """Hilfsfunktion: schalten, bei Fehler den alten Zustand behalten."""
+async def _set(on: bool, fallback: bool) -> tuple[bool, bool]:
+    """Hilfsfunktion: schalten, bei Fehler den alten Zustand behalten.
+
+    Returnt (neuer_zustand, erfolgreich).
+    """
     try:
         await shelly.set_switch(on)
-        return on
+        return on, True
     except shelly.ShellyError:
-        return fallback
+        return fallback, False
 
 
 async def _apply_automation(on: bool, present: bool, now: float) -> bool:
@@ -93,8 +96,10 @@ async def _apply_automation(on: bool, present: bool, now: float) -> bool:
             except ValueError:
                 ended = False
         if not ended:
-            # weiter Ferien: sicherstellen, dass aus.
-            return await _set(False, on) if on else on
+            if on:
+                new_on, _ = await _set(False, on)
+                return new_on
+            return on
         # Ferien vorbei -> zurueck auf Anwesenheit und normal weiter.
         settings_store.set_mode("presence")
         mode = "presence"
@@ -104,7 +109,8 @@ async def _apply_automation(on: bool, present: bool, now: float) -> bool:
         desired = _schedule_desired(datetime.now())
         if desired != _last_schedule_desired:
             _last_schedule_desired = desired
-            return await _set(desired, on)
+            new_on, _ = await _set(desired, on)
+            return new_on
         return on
 
     # --- Anwesenheitsmodus (Standard) --------------------------------------
@@ -113,13 +119,19 @@ async def _apply_automation(on: bool, present: bool, now: float) -> bool:
         if _absent_since is None:
             _absent_since = now
         if on and (now - _absent_since) >= delay:
-            _auto_off = True
-            return await _set(False, on)
+            # Automatisches Abschalten.
+            new_on, ok = await _set(False, on)
+            if ok:
+                _auto_off = True
+            return new_on
     else:
         _absent_since = None
         if _auto_off and not on:
-            _auto_off = False
-            return await _set(True, on)
+            # Automatisches Wiedereinschalten.
+            new_on, ok = await _set(True, on)
+            if ok:
+                _auto_off = False
+            return new_on
     return on
 
 

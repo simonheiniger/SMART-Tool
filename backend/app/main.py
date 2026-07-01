@@ -42,17 +42,19 @@ async def lifespan(app: FastAPI):
             await task
         except asyncio.CancelledError:
             pass
+        await shelly.aclose()
 
 
 app = FastAPI(title="Standby-Tool Backend", version="0.3.0", lifespan=lifespan)
 
 # Im Dev laeuft das Frontend (Vite) auf einem anderen Port -> CORS erlauben.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if os.environ.get("DEV") == "1":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 @app.get("/api/health")
@@ -120,7 +122,7 @@ async def savings(range: str = Query("day", pattern="^(day|week)$")) -> Savings:
         dt = cur["ts"] - prev["ts"]
         if dt <= 0:
             continue
-        consumed_wh += prev["power_w"] * (dt / 3600.0)
+        consumed_wh += 0.5 * (prev["power_w"] + cur["power_w"]) * (dt / 3600.0)
         if not prev["on"]:
             off_seconds += dt
 
@@ -151,6 +153,7 @@ async def put_settings(new: Settings) -> Settings:
         vacation_until=new.vacation_until,
         schedule=[w.model_dump() for w in new.schedule],
     )
+    poller.note_manual_toggle()
     return Settings(**updated)
 
 

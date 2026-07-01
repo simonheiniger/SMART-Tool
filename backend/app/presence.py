@@ -13,8 +13,12 @@ Erzwingen "abwesend" waehrend einer Demo.
 from __future__ import annotations
 
 import asyncio
+import time
 
 from . import config
+
+_cache: dict = {"value": None, "ts": 0.0}
+_TTL_S = 30.0
 
 
 async def _ping(target: str) -> bool:
@@ -42,4 +46,12 @@ async def is_present(override: bool | None) -> bool:
     if config.PRESENCE_MOCK:
         # Ohne Override im Mock: standardmaessig anwesend.
         return True
-    return await _ping(config.PRESENCE_TARGET)
+
+    now = time.monotonic()
+    if now - _cache["ts"] < _TTL_S and _cache["value"] is not None:
+        return _cache["value"]
+
+    result = await _ping(config.PRESENCE_TARGET)
+    _cache["value"] = result
+    _cache["ts"] = now
+    return result
