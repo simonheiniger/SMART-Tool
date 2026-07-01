@@ -1,0 +1,16 @@
+[Unit]
+Description=Standby-Tool Mock-Shelly (simulierter Shelly Gen4 fuer Tests ohne Hardware)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# User + Pfad ggf. an den Pi anpassen.
+User=pi
+WorkingDirectory=/home/pi/SMART-Tool
+ExecStart=/home/pi/SMART-Tool/.venv/bin/python mock-shelly/mock_shelly.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

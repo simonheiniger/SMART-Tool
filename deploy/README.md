@@ -59,3 +59,34 @@ sudo systemctl restart standby-tool
 ```
 
 Aufrufen im Browser (gleiches Netz): `http://<pi-ip>:8000`
+
+## Testen ohne echten Shelly (Mock)
+
+Solange kein echter Shelly angeschlossen ist, kann ein simulierter Shelly als
+eigener Dienst laufen. Dann funktioniert die ganze Oberfläche inkl. Schalten.
+
+```bash
+# Mock-Dienst installieren + bei Boot mitstarten
+sudo cp deploy/standby-mock.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now standby-mock
+```
+
+In `deploy/standby-tool.env` auf den Mock zeigen und Backend neu starten:
+
+```
+SHELLY_BASE_URL=http://127.0.0.1:8001
+```
+
+```bash
+sudo systemctl restart standby-tool
+```
+
+Sobald der echte Shelly da ist: `SHELLY_BASE_URL` auf dessen IP setzen und den
+Mock abschalten:
+
+```bash
+sudo systemctl disable --now standby-mock
+sudo systemctl restart standby-tool
+```
+
