@@ -25,3 +25,6 @@ frontend/.vite/
 # Lokale Konfiguration / Secrets
 .env
 backend/app/local_config.py
+
+# Pi: site-spezifische Env
+deploy/standby-tool.env
