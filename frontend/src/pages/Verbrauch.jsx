@@ -46,7 +46,6 @@ export default function Verbrauch() {
     return () => clearInterval(id);
   }, [load]);
 
-  // X-Achse je Zeitraum: Tag -> Uhrzeit, Woche -> Datum + Uhrzeit.
   const fmtAxis = (ts) => {
     const d = new Date(ts);
     if (range === "week") {
@@ -55,7 +54,6 @@ export default function Verbrauch() {
     return d.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Infozeile: Anzahl Punkte + tatsaechliche Zeitspanne der Daten.
   const span =
     data.length > 0
       ? `${new Date(data[0].ts).toLocaleString("de-CH")} – ${new Date(
@@ -65,18 +63,17 @@ export default function Verbrauch() {
 
   return (
     <div className="space-y-6">
-      {/* Zeitraum-Auswahl */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Energieverbrauch</h2>
-        <div className="flex gap-1">
+        <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
           {RANGES.map((r) => (
             <button
               key={r.id}
               onClick={() => setRange(r.id)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+              className={`px-3 py-1 rounded-md text-sm font-medium transition ${
                 range === r.id
-                  ? "bg-brand text-white"
-                  : "text-slate-300 hover:bg-slate-800"
+                  ? "bg-white text-brand shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               {r.label}
@@ -86,22 +83,20 @@ export default function Verbrauch() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-2 text-sm text-red-200">
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* Infozeile zum gewaehlten Zeitraum */}
       {span && (
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-slate-400">
           {data.length} Messpunkte · {span}
         </div>
       )}
 
-      {/* Diagramm */}
-      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4">
+      <div className="card p-4">
         {data.length === 0 ? (
-          <div className="h-64 flex items-center justify-center text-slate-500 text-sm">
+          <div className="h-64 flex items-center justify-center text-slate-400 text-sm">
             Noch keine Messdaten — Backend ein paar Minuten laufen lassen.
           </div>
         ) : (
@@ -109,30 +104,26 @@ export default function Verbrauch() {
             <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="watt" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#16a34a" stopOpacity={0.5} />
+                  <stop offset="0%" stopColor="#16a34a" stopOpacity={0.35} />
                   <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#1e293b" vertical={false} />
+              <CartesianGrid stroke="#e2e8f0" vertical={false} />
               <XAxis
                 dataKey="ts"
                 tickFormatter={fmtAxis}
-                stroke="#64748b"
+                stroke="#94a3b8"
                 fontSize={12}
                 minTickGap={40}
               />
-              <YAxis
-                stroke="#64748b"
-                fontSize={12}
-                unit=" W"
-                width={55}
-              />
+              <YAxis stroke="#94a3b8" fontSize={12} unit=" W" width={55} />
               <Tooltip
                 contentStyle={{
-                  background: "#0f172a",
-                  border: "1px solid #1e293b",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
                   borderRadius: 8,
-                  color: "#e2e8f0",
+                  color: "#0f172a",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 }}
                 labelFormatter={(ts) => new Date(ts).toLocaleString("de-CH")}
                 formatter={(v) => [`${v} W`, "Leistung"]}
@@ -149,7 +140,6 @@ export default function Verbrauch() {
         )}
       </div>
 
-      {/* Ersparnis */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
           label="Gespart"
@@ -164,15 +154,15 @@ export default function Verbrauch() {
         <StatCard
           label="Verbraucht"
           value={savings ? `${savings.consumed_kwh.toFixed(3)} kWh` : "—"}
-          accent="text-amber-400"
+          accent="text-amber-600"
         />
         <StatCard
           label="Aus-Zeit"
           value={savings ? fmtDuration(savings.off_seconds) : "—"}
-          accent="text-slate-300"
+          accent="text-slate-700"
         />
       </div>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-400">
         Ersparnis = angenommener Standby-Verbrauch × Zeit, in der das Tool das Gerät
         komplett ausgeschaltet hat. Standby-Watt und Strompreis unter „Einstellungen".
       </p>
@@ -191,8 +181,8 @@ function fmtDuration(seconds) {
 
 function StatCard({ label, value, accent }) {
   return (
-    <div className="rounded-xl bg-slate-900 border border-slate-800 p-4">
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
+    <div className="card p-4">
+      <div className="text-xs uppercase tracking-wide text-slate-400">{label}</div>
       <div className={`mt-1 text-xl font-semibold ${accent}`}>{value}</div>
     </div>
   );

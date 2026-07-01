@@ -44,7 +44,6 @@ export default function Einstellungen() {
     setStatus(null);
   }
 
-  // --- Zeitplan-Helfer ---
   function addWindow() {
     update("schedule", [
       ...form.schedule,
@@ -99,7 +98,7 @@ export default function Einstellungen() {
 
   if (!form) {
     return (
-      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-slate-400">
         {status === "error" ? "Backend nicht erreichbar" : "Lade Einstellungen…"}
       </div>
     );
@@ -108,7 +107,7 @@ export default function Einstellungen() {
   return (
     <form onSubmit={handleSave} className="space-y-6">
       {/* Gerät */}
-      <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+      <section className="card p-6">
         <Field
           label="Gerätename"
           hint="Name des angeschlossenen Geräts (z.B. Kaffeemaschine). Wird im Dashboard angezeigt."
@@ -125,7 +124,7 @@ export default function Einstellungen() {
       </section>
 
       {/* Betriebsmodus */}
-      <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-4">
+      <section className="card p-6 space-y-4">
         <h2 className="text-lg font-semibold">Betriebsmodus</h2>
         <div className="grid grid-cols-3 gap-3">
           {MODES.map((m) => (
@@ -135,8 +134,8 @@ export default function Einstellungen() {
               onClick={() => update("mode", m.id)}
               className={`rounded-xl border p-4 text-center transition ${
                 form.mode === m.id
-                  ? "border-brand bg-brand/10"
-                  : "border-slate-800 hover:border-slate-700"
+                  ? "border-brand bg-brand/5 ring-1 ring-brand/30"
+                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
               <div className="text-2xl">{m.icon}</div>
@@ -148,7 +147,6 @@ export default function Einstellungen() {
           {MODES.find((m) => m.id === form.mode)?.hint}
         </p>
 
-        {/* Ferien: Enddatum */}
         {form.mode === "vacation" && (
           <Field
             label="Rückkehr-Datum / -Zeit"
@@ -163,7 +161,6 @@ export default function Einstellungen() {
           </Field>
         )}
 
-        {/* Zeitplan: Fenster */}
         {form.mode === "schedule" && (
           <div className="space-y-3">
             {form.schedule.length === 0 && (
@@ -172,10 +169,7 @@ export default function Einstellungen() {
               </p>
             )}
             {form.schedule.map((w, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-slate-800 p-4 space-y-3"
-              >
+              <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3">
                 <div className="flex flex-wrap gap-1.5">
                   {WEEKDAYS.map((d, di) => (
                     <button
@@ -185,7 +179,7 @@ export default function Einstellungen() {
                       className={`w-9 h-9 rounded-md text-xs font-medium transition ${
                         w.days.includes(di)
                           ? "bg-brand text-white"
-                          : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                       }`}
                     >
                       {d}
@@ -193,14 +187,14 @@ export default function Einstellungen() {
                   ))}
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-slate-400">An</span>
+                  <span className="text-slate-500">An</span>
                   <input
                     type="time"
                     value={w.on_time}
                     onChange={(e) => setWindow(i, "on_time", e.target.value)}
                     className="input w-32"
                   />
-                  <span className="text-slate-400">Aus</span>
+                  <span className="text-slate-500">Aus</span>
                   <input
                     type="time"
                     value={w.off_time}
@@ -210,7 +204,7 @@ export default function Einstellungen() {
                   <button
                     type="button"
                     onClick={() => removeWindow(i)}
-                    className="ml-auto text-red-400 hover:text-red-300 text-sm"
+                    className="ml-auto text-red-500 hover:text-red-600 text-sm"
                   >
                     Entfernen
                   </button>
@@ -228,9 +222,9 @@ export default function Einstellungen() {
         )}
       </section>
 
-      {/* Anwesenheits-Einstellungen (nur relevant im Anwesenheitsmodus) */}
+      {/* Anwesenheit (nur im Anwesenheitsmodus) */}
       {form.mode === "presence" && (
-        <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-6">
+        <section className="card p-6 space-y-6">
           <h2 className="text-lg font-semibold">Anwesenheit</h2>
           <Field
             label="Abschaltverzögerung"
@@ -264,8 +258,8 @@ export default function Einstellungen() {
         </section>
       )}
 
-      {/* Ersparnis-Parameter (immer) */}
-      <section className="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-6">
+      {/* Ersparnis-Parameter */}
+      <section className="card p-6 space-y-6">
         <h2 className="text-lg font-semibold">Ersparnis-Berechnung</h2>
         <Field
           label="Angenommener Standby-Verbrauch"
@@ -297,29 +291,15 @@ export default function Einstellungen() {
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2 rounded-md bg-brand hover:bg-brand-dark text-white font-medium transition disabled:opacity-50"
+          className="px-5 py-2 rounded-lg bg-brand hover:bg-brand-dark text-white font-medium shadow-sm transition disabled:opacity-50"
         >
           {saving ? "Speichere…" : "Speichern"}
         </button>
         {status === "saved" && <span className="text-sm text-brand">Gespeichert ✓</span>}
         {status === "error" && (
-          <span className="text-sm text-red-400">Fehler beim Speichern</span>
+          <span className="text-sm text-red-500">Fehler beim Speichern</span>
         )}
       </div>
-
-      <style>{`
-        .input {
-          background: #0f172a;
-          border: 1px solid #1e293b;
-          border-radius: 0.5rem;
-          padding: 0.5rem 0.75rem;
-          color: #e2e8f0;
-          outline: none;
-          width: 100%;
-        }
-        .input:focus { border-color: #16a34a; }
-        input[type="time"], input[type="datetime-local"] { color-scheme: dark; }
-      `}</style>
     </form>
   );
 }
@@ -327,7 +307,7 @@ export default function Einstellungen() {
 function Field({ label, hint, suffix, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-200">{label}</label>
+      <label className="block text-sm font-medium text-slate-700">{label}</label>
       {hint && <p className="text-xs text-slate-500 mt-0.5 mb-2">{hint}</p>}
       <div className="flex items-center gap-2">
         <div className="flex-1">{children}</div>
