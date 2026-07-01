@@ -54,7 +54,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
           {error}
         </div>
       )}
@@ -63,7 +63,7 @@ export default function Dashboard() {
       <div className="card p-8 flex flex-col items-center gap-5">
         <div className="text-center">
           <h2 className="text-2xl font-bold tracking-tight">{deviceName}</h2>
-          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
             <span>{modeInfo.icon}</span>
             {modeInfo.text}
           </span>
@@ -75,13 +75,13 @@ export default function Dashboard() {
           className={`relative h-44 w-44 rounded-full text-lg font-bold transition-all duration-200 disabled:opacity-50 ${
             on
               ? "bg-brand text-white shadow-lg shadow-brand/30 hover:bg-brand-dark"
-              : "bg-slate-100 text-slate-500 hover:bg-slate-200 ring-1 ring-inset ring-slate-200"
+              : "bg-slate-100 text-slate-500 hover:bg-slate-200 ring-1 ring-inset ring-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600 dark:ring-slate-600"
           }`}
         >
           <span className="block text-4xl mb-1">⏻</span>
           {on ? "EIN" : "AUS"}
         </button>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-400 dark:text-slate-500">
           {busy ? "Schalte…" : "Tippen zum Ein-/Ausschalten"}
         </p>
       </div>
@@ -91,17 +91,17 @@ export default function Dashboard() {
         <StatCard
           label="Aktueller Verbrauch"
           value={`${power.toFixed(1)} W`}
-          accent={power > 0 ? "text-amber-600" : "text-slate-400"}
+          accent={power > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-400"}
         />
         <StatCard
           label="Status"
           value={on ? "Eingeschaltet" : "Ausgeschaltet"}
-          accent={on ? "text-brand" : "text-slate-500"}
+          accent={on ? "text-brand" : "text-slate-500 dark:text-slate-400"}
         />
         <StatCard
           label="Anwesenheit"
           value={present ? "Jemand da" : "Niemand da"}
-          accent={present ? "text-sky-600" : "text-slate-400"}
+          accent={present ? "text-sky-600 dark:text-sky-400" : "text-slate-400"}
         />
         <StatCard
           label="Letzte Aktualisierung"
@@ -110,7 +110,7 @@ export default function Dashboard() {
               ? new Date(status.last_update * 1000).toLocaleTimeString("de-CH")
               : "—"
           }
-          accent="text-slate-700"
+          accent="text-slate-700 dark:text-slate-200"
         />
       </div>
     </div>

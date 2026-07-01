@@ -134,8 +134,8 @@ export default function Einstellungen() {
               onClick={() => update("mode", m.id)}
               className={`rounded-xl border p-4 text-center transition ${
                 form.mode === m.id
-                  ? "border-brand bg-brand/5 ring-1 ring-brand/30"
-                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  ? "border-brand bg-brand/5 ring-1 ring-brand/30 dark:bg-brand/10"
+                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-700/50"
               }`}
             >
               <div className="text-2xl">{m.icon}</div>
@@ -169,7 +169,7 @@ export default function Einstellungen() {
               </p>
             )}
             {form.schedule.map((w, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3">
+              <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3 dark:border-slate-700">
                 <div className="flex flex-wrap gap-1.5">
                   {WEEKDAYS.map((d, di) => (
                     <button
@@ -179,7 +179,7 @@ export default function Einstellungen() {
                       className={`w-9 h-9 rounded-md text-xs font-medium transition ${
                         w.days.includes(di)
                           ? "bg-brand text-white"
-                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                       }`}
                     >
                       {d}
@@ -187,14 +187,14 @@ export default function Einstellungen() {
                   ))}
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-slate-500">An</span>
+                  <span className="text-slate-500 dark:text-slate-400">An</span>
                   <input
                     type="time"
                     value={w.on_time}
                     onChange={(e) => setWindow(i, "on_time", e.target.value)}
                     className="input w-32"
                   />
-                  <span className="text-slate-500">Aus</span>
+                  <span className="text-slate-500 dark:text-slate-400">Aus</span>
                   <input
                     type="time"
                     value={w.off_time}
@@ -307,7 +307,7 @@ export default function Einstellungen() {
 function Field({ label, hint, suffix, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700">{label}</label>
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">{label}</label>
       {hint && <p className="text-xs text-slate-500 mt-0.5 mb-2">{hint}</p>}
       <div className="flex items-center gap-2">
         <div className="flex-1">{children}</div>

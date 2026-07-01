@@ -1,4 +1,4 @@
-# Umsetzungsplan — Website zum Standby-Tool
+s# Umsetzungsplan — Website zum Standby-Tool
 
 Schritt-für-Schritt. Jeder Schritt ist lauffähig + testbar, bevor der nächste kommt.
 Haken setzen, wenn ein Schritt fertig + getestet ist.

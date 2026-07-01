@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { api } from "../api.js";
+import { useTheme } from "../theme.js";
 
 const RANGES = [
   { id: "day", label: "Tag" },
@@ -16,6 +17,7 @@ const RANGES = [
 ];
 
 export default function Verbrauch() {
+  const { dark } = useTheme();
   const [range, setRange] = useState("day");
   const [data, setData] = useState([]);
   const [savings, setSavings] = useState(null);
@@ -65,15 +67,15 @@ export default function Verbrauch() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Energieverbrauch</h2>
-        <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
+        <div className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
           {RANGES.map((r) => (
             <button
               key={r.id}
               onClick={() => setRange(r.id)}
               className={`px-3 py-1 rounded-md text-sm font-medium transition ${
                 range === r.id
-                  ? "bg-white text-brand shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white text-brand shadow-sm dark:bg-slate-700"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               {r.label}
@@ -83,13 +85,13 @@ export default function Verbrauch() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
           {error}
         </div>
       )}
 
       {span && (
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-slate-400 dark:text-slate-500">
           {data.length} Messpunkte · {span}
         </div>
       )}
@@ -108,21 +110,26 @@ export default function Verbrauch() {
                   <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#e2e8f0" vertical={false} />
+              <CartesianGrid stroke={dark ? "#334155" : "#e2e8f0"} vertical={false} />
               <XAxis
                 dataKey="ts"
                 tickFormatter={fmtAxis}
-                stroke="#94a3b8"
+                stroke={dark ? "#64748b" : "#94a3b8"}
                 fontSize={12}
                 minTickGap={40}
               />
-              <YAxis stroke="#94a3b8" fontSize={12} unit=" W" width={55} />
+              <YAxis
+                stroke={dark ? "#64748b" : "#94a3b8"}
+                fontSize={12}
+                unit=" W"
+                width={55}
+              />
               <Tooltip
                 contentStyle={{
-                  background: "#ffffff",
-                  border: "1px solid #e2e8f0",
+                  background: dark ? "#1e293b" : "#ffffff",
+                  border: `1px solid ${dark ? "#334155" : "#e2e8f0"}`,
                   borderRadius: 8,
-                  color: "#0f172a",
+                  color: dark ? "#f1f5f9" : "#0f172a",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 }}
                 labelFormatter={(ts) => new Date(ts).toLocaleString("de-CH")}
@@ -154,15 +161,15 @@ export default function Verbrauch() {
         <StatCard
           label="Verbraucht"
           value={savings ? `${savings.consumed_kwh.toFixed(3)} kWh` : "—"}
-          accent="text-amber-600"
+          accent="text-amber-600 dark:text-amber-400"
         />
         <StatCard
           label="Aus-Zeit"
           value={savings ? fmtDuration(savings.off_seconds) : "—"}
-          accent="text-slate-700"
+          accent="text-slate-700 dark:text-slate-200"
         />
       </div>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-400 dark:text-slate-500">
         Ersparnis = angenommener Standby-Verbrauch × Zeit, in der das Tool das Gerät
         komplett ausgeschaltet hat. Standby-Watt und Strompreis unter „Einstellungen".
       </p>

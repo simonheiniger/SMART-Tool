@@ -101,10 +101,41 @@ async def toggle(req: ToggleRequest) -> Status:
     )
 
 
+# Maximale Punktzahl fuer den Chart. Mehr Punkte machen die SVG-Darstellung
+# im Browser traege, ohne sichtbaren Mehrwert.
+_MAX_CHART_POINTS = 400
+
+
+def _downsample(rows: list[dict], max_points: int) -> list[dict]:
+    """Buendelt Messwerte auf hoechstens `max_points` (Mittelwert pro Bucket)."""
+    n = len(rows)
+    if n <= max_points:
+        return rows
+    bucket = n / max_points
+    out: list[dict] = []
+    for i in range(max_points):
+        start = int(i * bucket)
+        end = int((i + 1) * bucket) or start + 1
+        chunk = rows[start:end]
+        if not chunk:
+            continue
+        mid = chunk[len(chunk) // 2]
+        out.append(
+            {
+                "ts": mid["ts"],
+                "power_w": sum(r["power_w"] for r in chunk) / len(chunk),
+                "on": mid["on"],
+                "present": mid["present"],
+            }
+        )
+    return out
+
+
 @app.get("/api/history", response_model=list[Measurement])
 async def history(range: str = Query("day", pattern="^(day|week)$")) -> list[Measurement]:
     since = time.time() - _RANGE_SECONDS[range]
-    return [Measurement(**row) for row in db.get_history(since)]
+    rows = _downsample(db.get_history(since), _MAX_CHART_POINTS)
+    return [Measurement(**row) for row in rows]
 
 
 @app.get("/api/savings", response_model=Savings)
